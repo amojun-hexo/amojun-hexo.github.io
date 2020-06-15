@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/just%20do%20it.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/just%20do%20it.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/time.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"127.0.0.1","root":"/","scheme":"Gemini","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="802.11帧802.11 帧最大长度为2346个字节，结构如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[学习笔记]WLAN_802.11 MAC 架构">
+<meta property="og:url" content="http://127.0.0.1/2020/03/03/WLAN-802-11-MAC%E5%B8%A7/index.html">
+<meta property="og:site_name" content="AmoJunBlog">
+<meta property="og:description" content="802.11帧802.11 帧最大长度为2346个字节，结构如下：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_Frame%20Control.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_Duration.png">
+<meta property="article:published_time" content="2020-03-03T04:36:37.000Z">
+<meta property="article:modified_time" content="2020-03-06T04:19:41.386Z">
+<meta property="article:author" content="MaoJun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://amojun.xyz/blog/images/WLAN_Frame%20Control.png">
+
+<link rel="canonical" href="http://127.0.0.1/2020/03/03/WLAN-802-11-MAC%E5%B8%A7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>[学习笔记]WLAN_802.11 MAC 架构 | AmoJunBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">AmoJunBlog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Just do it</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://127.0.0.1/2020/03/03/WLAN-802-11-MAC%E5%B8%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/timg.jpg">
+      <meta itemprop="name" content="MaoJun">
+      <meta itemprop="description" content="学习的分享">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="AmoJunBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [学习笔记]WLAN_802.11 MAC 架构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-03 12:36:37" itemprop="dateCreated datePublished" datetime="2020-03-03T12:36:37+08:00">2020-03-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-06 12:19:41" itemprop="dateModified" datetime="2020-03-06T12:19:41+08:00">2020-03-06</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="802-11帧"><a href="#802-11帧" class="headerlink" title="802.11帧"></a>802.11帧</h1><p>802.11 帧最大长度为2346个字节，结构如下：<br>     <img src= "https://amojun.xyz/blog/images/WLAN_802.11帧.png"></p>
+<a id="more"></a>
+<p>帧结构大致分为<br><br>&emsp;&emsp;帧头&emsp;&emsp;MAC Header (Frame Control-Address 4 (optional) )<br><br>&emsp;&emsp;帧主体&emsp;Frame Body<br><br>&emsp;&emsp;帧校验&emsp;FCS<br></p>
+<p>为上面图片的解释：<br><br>Frame Control</p>
+<pre><code>帧控制，指定帧的类型等等</code></pre><p>Duration ID</p>
+<pre><code>持续时间,用来记载网络分配矢量NAV得值</code></pre><p>Address 1 (receiver)</p>
+<pre><code>代表帧接收端的地址，在某些情况下，接收端就是目的地址，反则为设置为广播或者组播地址，就要检测BSSID(基本服务组合识别码)，工作站只会应答来自同一个基本服务组合的广播或组播信息，其他的BSS会忽略</code></pre><p>Address 2 (sender) </p>
+<pre><code>代表发送端的地址，用来发送应答信息</code></pre><p>Address 3 (filtering) </p>
+<pre><code>过滤地址，供基站与传输系统过滤之用</code></pre><p>Address 4 (optional)</p>
+<pre><code>一般不用，在WDS(无线传输系统)中才用</code></pre><p>Seq-ctl </p>
+<pre><code>用来重组帧片段以及丢弃重复帧，由两个编号组成</code></pre><p>Frame Boby</p>
+<pre><code>在工作站之间传送上层数据</code></pre><p>FCS </p>
+<pre><code>让工作站得以检查所收到的帧的完整性</code></pre><h2 id="Frame-Control"><a href="#Frame-Control" class="headerlink" title="Frame Control"></a>Frame Control</h2><p>Frame Control 帧控制，因为是控制帧的类型的所以比较重要，下面是Frame Control的结构：<br>    <img src="https://amojun.xyz/blog/images/WLAN_Frame Control.png"><br>Protocol (协议版本)</p>
+<pre><code>图中版本为0，因为这是目前唯一的版本，以后可能会出其他版本</code></pre><p>Type (类型)</p>
+<pre><code>用来区分帧的类型 //00为管理帧、01为控制帧、10为数据帧、11为保留</code></pre><p>Sub Type (子类型)</p>
+<pre><code>代表发送帧的子类型，比如 Type=01，Sub Type=1011；允许发送帧CTS的Type=01，Sub Tpye=1100</code></pre><h2 id="Duration-ID"><a href="#Duration-ID" class="headerlink" title="Duration/ID"></a>Duration/ID</h2><p>Duration(持续时间)位用来记载网络分配矢量(NAV)的值，访问介质的时间限制是由NAV所指定</p>
+<img src="https://amojun.xyz/blog/images/WLAN_Duration.png">
+
+
+<h1 id="802-11帧-帧类型"><a href="#802-11帧-帧类型" class="headerlink" title="802.11帧 - 帧类型"></a>802.11帧 - 帧类型</h1><pre><code>管理帧 --- 在Frame Control里type数值为00
+ 管理帧分类
+    Beacon(信标帧) //用于AP周期性宣告无线网络的存在及其支持的各类无线参数。
+    Association Request/Response(关联请求/应答帧) //用于STA(工作站)加入某个无线网络时与AP之间通信使用。
+    Disassociation(去关联帧) //当STA解除与AP的关联时，使用该帧。
+    Authentication Request/Response(认证请求/应答帧)
+    Deauthentication(去认证帧)
+    Probe Request/Response(探测请求/应答帧) //用于探测周围存在的无线网络。
+控制帧 --- 在Frame Control里type数值为01
+ 控制帧分类
+    RTS(请求发送) //获取介质的控制权，得以方便传输帧
+          RTS在Frame Control里面subtype值为1011
+    CTS(允许发送) //目的客户端收到RTS后，发送一个CTS报文，为了是告诉范围里面的设备在指定的时间内不要发送数据了
+         CTS在Frame Control里面subtype值为1100
+    ACK(应答) //每个发送的单播报文，接收者在成功接受到发送报文后，都要发送一个应答ACK进行确认
+         ACK在Frame Control里面subtype值为1101
+    PS-Poll  //当客户端从省电模式中苏醒，便会发送一个PS-Poll帧给AP，以取得任何暂存帧
+         PS-Poll在Frame Control里面subtype值为1010
+数据帧 --- 在Frame Control里type数值为10
+    将上层协议的数据置于帧主体(Frame Boby)中加以传递
+保留帧(不使用) --- 在Frame Control里type数值为11</code></pre>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/02/WLAN%E7%AC%94%E8%AE%B0/" rel="prev" title="[学习笔记]WLAN概念">
+      <i class="fa fa-chevron-left"></i> [学习笔记]WLAN概念
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/05/WLAN-%E4%BA%A7%E5%93%81%E5%8F%8A%E7%BB%84%E7%BD%91%E6%96%B9%E5%BC%8F/" rel="next" title="[学习笔记]WLAN_产品及拓扑结构">
+      [学习笔记]WLAN_产品及拓扑结构 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#802-11帧"><span class="nav-number">1.</span> <span class="nav-text">802.11帧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Frame-Control"><span class="nav-number">1.1.</span> <span class="nav-text">Frame Control</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Duration-ID"><span class="nav-number">1.2.</span> <span class="nav-text">Duration&#x2F;ID</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#802-11帧-帧类型"><span class="nav-number">2.</span> <span class="nav-text">802.11帧 - 帧类型</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MaoJun"
+      src="/images/timg.jpg">
+  <p class="site-author-name" itemprop="name">MaoJun</p>
+  <div class="site-description" itemprop="description">学习的分享</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MaoJun</span>
+</div>
+  <span class="post-meta-divider"></span>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

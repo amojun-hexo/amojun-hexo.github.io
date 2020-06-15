@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/just%20do%20it.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/just%20do%20it.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/time.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"127.0.0.1","root":"/","scheme":"Gemini","version":"7.7.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="拓扑：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[实验笔记]简单WLAN实验">
+<meta property="og:url" content="http://127.0.0.1/2020/03/10/%E7%AE%80%E5%8D%95WLAN%E5%AE%9E%E9%AA%8C/index.html">
+<meta property="og:site_name" content="AmoJunBlog">
+<meta property="og:description" content="拓扑：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C%E6%8B%93%E6%89%91.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E5%88%9B%E5%BB%BA%E7%AE%A1%E7%90%86%E3%80%81%E4%B8%9A%E5%8A%A1VLAN.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E9%85%8D%E7%BD%AE%E6%8E%A5%E5%8F%A3%E4%B8%BAtrunk.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E9%85%8D%E7%BD%AE%E6%8E%A5%E5%8F%A3%E4%B8%BAtrunk1.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_DHCP%E9%85%8D%E7%BD%AE.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_AP%E7%BB%84.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E5%9B%BD%E5%AE%B6%E7%A0%81.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E6%A8%A1%E6%9D%BF%E5%BC%95%E5%85%A5.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_AC%E6%BA%90%E6%8E%A5%E5%8F%A3.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_AP%E8%AE%A4%E8%AF%81%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%B8%8A%E7%BA%BF.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E5%AE%89%E5%85%A8%E6%A8%A1%E6%9D%BF.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_SSID%E6%A8%A1%E6%9D%BF.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_VAP%E6%A8%A1%E6%9D%BF.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E5%B0%84%E9%A2%91%E6%A8%A1%E6%9D%BF.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E5%B0%84%E9%A2%91%E7%9A%84%E4%BF%A1%E9%81%93%E5%92%8C%E5%8A%9F%E7%8E%87.png">
+<meta property="og:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C_%E6%95%88%E6%9E%9C.png">
+<meta property="article:published_time" content="2020-03-10T05:48:08.000Z">
+<meta property="article:modified_time" content="2020-03-12T04:08:31.747Z">
+<meta property="article:author" content="MaoJun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://amojun.xyz/blog/images/WLAN_%E7%AE%80%E5%8D%95%E5%AE%9E%E9%AA%8C%E6%8B%93%E6%89%91.png">
+
+<link rel="canonical" href="http://127.0.0.1/2020/03/10/%E7%AE%80%E5%8D%95WLAN%E5%AE%9E%E9%AA%8C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>[实验笔记]简单WLAN实验 | AmoJunBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">AmoJunBlog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">Just do it</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://127.0.0.1/2020/03/10/%E7%AE%80%E5%8D%95WLAN%E5%AE%9E%E9%AA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/timg.jpg">
+      <meta itemprop="name" content="MaoJun">
+      <meta itemprop="description" content="学习的分享">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="AmoJunBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          [实验笔记]简单WLAN实验
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-10 13:48:08" itemprop="dateCreated datePublished" datetime="2020-03-10T13:48:08+08:00">2020-03-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-12 12:08:31" itemprop="dateModified" datetime="2020-03-12T12:08:31+08:00">2020-03-12</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="拓扑："><a href="#拓扑：" class="headerlink" title="拓扑："></a>拓扑：</h1><img src="https://amojun.xyz/blog/images/WLAN_简单实验拓扑.png">
+
+<a id="more"></a>
+
+<h1 id="配置："><a href="#配置：" class="headerlink" title="配置："></a>配置：</h1><h2 id="AC创建管理、业务VLAN"><a href="#AC创建管理、业务VLAN" class="headerlink" title="AC创建管理、业务VLAN"></a>AC创建管理、业务VLAN</h2><pre><code>vlan batch 100 101</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_创建管理、业务VLAN.png">
+
+<h2 id="配置AC的两个接口为trunk"><a href="#配置AC的两个接口为trunk" class="headerlink" title="配置AC的两个接口为trunk"></a>配置AC的两个接口为trunk</h2><pre><code>interface GigabitEthernet 0/0/1
+port link-type trunk
+port trunk pvid vlan 100
+port trunk allow-pass vlan 100</code></pre><table border="0" colour="#FFFFFF">
+    <tr>
+        <td>
+              <img src="https://amojun.xyz/blog/images/WLAN_简单实验_配置接口为trunk.png" width=100%>
+        </td>
+     <td>
+              <img src="https://amojun.xyz/blog/images/WLAN_简单实验_配置接口为trunk1.png ">
+        </td>
+    </tr>
+</table>
+
+<h2 id="配置DHCP，以VLANIF地址网段为地址池"><a href="#配置DHCP，以VLANIF地址网段为地址池" class="headerlink" title="配置DHCP，以VLANIF地址网段为地址池"></a>配置DHCP，以VLANIF地址网段为地址池</h2><pre><code>dhcp enable
+interface vlanif 100
+ip address 10.23.100.1 24
+dhcp select interface
+q
+interface vlanif 101
+ip address 10.23.101.1 24
+dhcp select interface
+q</code></pre><img src="https://amojun.xyz/blog/images/WLAN_简单实验_DHCP配置.png">
+
+<h2 id="创建AP组"><a href="#创建AP组" class="headerlink" title="创建AP组"></a>创建AP组</h2><pre><code>wlan-view
+  ap-group name ap-group1
+  q</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_AP组.png">
+
+
+<h2 id="配置国家码"><a href="#配置国家码" class="headerlink" title="配置国家码"></a>配置国家码</h2><pre><code>wlan-view
+  regulatory-domain-profile name domain1
+  counrty-code CN
+  q</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_国家码.png">
+
+
+
+<h2 id="将模板引入到AP组"><a href="#将模板引入到AP组" class="headerlink" title="将模板引入到AP组"></a>将模板引入到AP组</h2><pre><code>wlan-view
+  ap-group name ap-group1
+  regulatory-domain-profile domain1
+   y
+   q</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_模板引入.png"> 
+
+
+
+<h2 id="配置AC的源接口-vlanif-100"><a href="#配置AC的源接口-vlanif-100" class="headerlink" title="配置AC的源接口-vlanif 100"></a>配置AC的源接口-vlanif 100</h2><pre><code>AC-view
+    capwap source interface vlanid 100</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_AC源接口.png"> 
+
+
+
+<h2 id="配置AP的认证模式及AP上线"><a href="#配置AP的认证模式及AP上线" class="headerlink" title="配置AP的认证模式及AP上线"></a>配置AP的认证模式及AP上线</h2><pre><code>wlan-view
+  ap auth-mode mac-auth
+  ap-id 0 ap-mac MAC地址
+  ap-name area_1
+  ap-group ap-grourp1
+  y</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_AP认证模式和上线.png">
+
+<h2 id="配置AC为瘦AP下发的WLAN业务"><a href="#配置AC为瘦AP下发的WLAN业务" class="headerlink" title="配置AC为瘦AP下发的WLAN业务"></a>配置AC为瘦AP下发的WLAN业务</h2><h3 id="安全模板"><a href="#安全模板" class="headerlink" title="安全模板"></a>安全模板</h3><pre><code>wlan-view
+  security-profile name wlan-security
+  security wpa2 psk pass-phrase 密码 aes</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_安全模板.png">
+
+<h3 id="SSID模板"><a href="#SSID模板" class="headerlink" title="SSID模板"></a>SSID模板</h3><pre><code>wlan-view
+  ssid-profile name wlan-ssid
+  ssid wlan-net</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_SSID模板.png">
+
+<h3 id="VAP模板"><a href="#VAP模板" class="headerlink" title="VAP模板"></a>VAP模板</h3><pre><code>wlan-view
+    vap-profile name wlan-vap
+    forward-mode tunnel
+    service-vlan vlan-id 101
+    security-profile wlan-security
+    ssid-porfile wlan-ssid</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_VAP模板.png">
+
+<h3 id="射频模板"><a href="#射频模板" class="headerlink" title="射频模板"></a>射频模板</h3><pre><code>wlan-view
+   ap-group name ap-group1
+   vap-profile wlan-vap waln 1 radio 0
+   vap-profile wlan-vap waln 1 radio 1
+   q</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_射频模板.png">
+
+<h3 id="设置射频的信道和功率"><a href="#设置射频的信道和功率" class="headerlink" title="设置射频的信道和功率"></a>设置射频的信道和功率</h3><pre><code>wlan-view
+   rrm-profile name default
+   calibrate auto-channel-select disable
+   calibrate auto-rxpower-select disable
+   q
+   ap-id 0
+   radio 0
+   channel 20mhz 6
+   y
+   q
+   radio 1
+   channel 20mhz 149
+   y
+   q
+   q</code></pre> <img src="https://amojun.xyz/blog/images/WLAN_简单实验_射频的信道和功率.png">
+
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><img src="https://amojun.xyz/blog/images/WLAN_简单实验_效果.png">
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/06/WLAN-%E7%BB%84%E7%BD%91%E5%92%8C%E8%BD%AC%E5%8F%91%E6%96%B9%E5%BC%8F%E5%8F%8A%E9%85%8D%E7%BD%AE%E6%B5%81%E7%A8%8B/" rel="prev" title="[学习笔记]WLAN_组网和转发方式及配置流程">
+      <i class="fa fa-chevron-left"></i> [学习笔记]WLAN_组网和转发方式及配置流程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/19/eNSP%E9%94%99%E8%AF%AF%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%5B%E6%9B%B4%E6%96%B0%5D/" rel="next" title="eNSP错误解决方法[更新]">
+      eNSP错误解决方法[更新] <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#拓扑："><span class="nav-number">1.</span> <span class="nav-text">拓扑：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置："><span class="nav-number">2.</span> <span class="nav-text">配置：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AC创建管理、业务VLAN"><span class="nav-number">2.1.</span> <span class="nav-text">AC创建管理、业务VLAN</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置AC的两个接口为trunk"><span class="nav-number">2.2.</span> <span class="nav-text">配置AC的两个接口为trunk</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DHCP，以VLANIF地址网段为地址池"><span class="nav-number">2.3.</span> <span class="nav-text">配置DHCP，以VLANIF地址网段为地址池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建AP组"><span class="nav-number">2.4.</span> <span class="nav-text">创建AP组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置国家码"><span class="nav-number">2.5.</span> <span class="nav-text">配置国家码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将模板引入到AP组"><span class="nav-number">2.6.</span> <span class="nav-text">将模板引入到AP组</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置AC的源接口-vlanif-100"><span class="nav-number">2.7.</span> <span class="nav-text">配置AC的源接口-vlanif 100</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置AP的认证模式及AP上线"><span class="nav-number">2.8.</span> <span class="nav-text">配置AP的认证模式及AP上线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置AC为瘦AP下发的WLAN业务"><span class="nav-number">2.9.</span> <span class="nav-text">配置AC为瘦AP下发的WLAN业务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安全模板"><span class="nav-number">2.9.1.</span> <span class="nav-text">安全模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SSID模板"><span class="nav-number">2.9.2.</span> <span class="nav-text">SSID模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VAP模板"><span class="nav-number">2.9.3.</span> <span class="nav-text">VAP模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#射频模板"><span class="nav-number">2.9.4.</span> <span class="nav-text">射频模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置射频的信道和功率"><span class="nav-number">2.9.5.</span> <span class="nav-text">设置射频的信道和功率</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#效果"><span class="nav-number">2.10.</span> <span class="nav-text">效果</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="MaoJun"
+      src="/images/timg.jpg">
+  <p class="site-author-name" itemprop="name">MaoJun</p>
+  <div class="site-description" itemprop="description">学习的分享</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MaoJun</span>
+</div>
+  <span class="post-meta-divider"></span>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
